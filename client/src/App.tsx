@@ -1,30 +1,184 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
+import { CustomerDashboard } from './pages/dashboards/CustomerDashboard';
+import { StaffDashboard } from './pages/dashboards/StaffDashboard';
+import { AdminDashboard } from './pages/dashboards/AdminDashboard';
+import { SuperAdminDashboard } from './pages/dashboards/SuperAdminDashboard';
+import { Toaster } from 'sonner';
+
+// Root redirect handler
+const RootRedirect: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-100">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  switch (user.role) {
+    case 'staff':
+      return <Navigate to="/staff/dashboard" replace />;
+    case 'organization_admin':
+      return <Navigate to="/admin/dashboard" replace />;
+    case 'super_admin':
+      return <Navigate to="/super-admin/dashboard" replace />;
+    case 'customer':
+    default:
+      return <Navigate to="/dashboard" replace />;
+  }
+};
+
 export function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl space-y-6 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 font-semibold text-lg">
-          QL
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-white">QueueLess</h1>
-          <p className="text-sm text-slate-400">Smart Queue Management System</p>
-        </div>
-        <div className="p-4 rounded-lg bg-slate-950/60 border border-slate-800/80 text-left text-xs font-mono space-y-2 text-slate-300">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Frontend:</span>
-            <span className="text-emerald-400 font-semibold">React + Vite + TS</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Styling:</span>
-            <span className="text-blue-400 font-semibold">Tailwind CSS + shadcn</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Status:</span>
-            <span className="text-amber-400 font-semibold">Architecture Initialized</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Router>
+      <AuthProvider>
+        <Toaster position="top-right" theme="dark" richColors />
+        <Routes>
+          {/* Public Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          {/* Customer Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/queue/join"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-token"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Staff Protected Routes */}
+          <Route
+            path="/staff/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['staff', 'organization_admin', 'super_admin']}>
+                <StaffDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/queue"
+            element={
+              <ProtectedRoute allowedRoles={['staff', 'organization_admin', 'super_admin']}>
+                <StaffDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Organization Admin Protected Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/organization"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/services"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/counters"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/staff"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Super Admin Protected Routes */}
+          <Route
+            path="/super-admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 

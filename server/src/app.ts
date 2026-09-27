@@ -1,18 +1,36 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/authRoutes';
+import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
 
-app.use(cors());
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
-    status: 'ok',
-    system: 'QueueLess API Server',
-    timestamp: new Date().toISOString()
+    success: true,
+    message: 'QueueLess API Server operational',
+    data: {
+      system: 'QueueLess API',
+      timestamp: new Date().toISOString(),
+    },
   });
 });
+
+app.use('/api/auth', authRoutes);
+
+app.use(errorHandler);
 
 export default app;
