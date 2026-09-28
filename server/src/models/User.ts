@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export type UserRole = 'customer' | 'staff' | 'organization_admin' | 'super_admin';
 
@@ -8,6 +8,8 @@ export interface IUser extends Document {
   phone: string;
   passwordHash: string;
   role: UserRole;
+  organizationId?: Types.ObjectId;
+  counterId?: Types.ObjectId;
   isEmailVerified: boolean;
   isActive: boolean;
   lastLoginAt?: Date;
@@ -47,6 +49,16 @@ const UserSchema = new Schema<IUser>(
       enum: ['customer', 'staff', 'organization_admin', 'super_admin'],
       default: 'customer',
       required: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      index: true,
+    },
+    counterId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Counter',
+      index: true,
     },
     isEmailVerified: {
       type: Boolean,

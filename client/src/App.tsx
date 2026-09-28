@@ -7,9 +7,16 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { CustomerDashboard } from './pages/dashboards/CustomerDashboard';
+import { ActiveTokenPage } from './pages/customer/ActiveTokenPage';
+import { QueueHistoryPage } from './pages/customer/QueueHistoryPage';
+import { ProfilePage } from './pages/customer/ProfilePage';
 import { StaffDashboard } from './pages/dashboards/StaffDashboard';
 import { AdminDashboard } from './pages/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './pages/dashboards/SuperAdminDashboard';
+import { OrganizationManager } from './pages/admin/OrganizationManager';
+import { ServiceManager } from './pages/admin/ServiceManager';
+import { CounterManager } from './pages/admin/CounterManager';
+import { StaffManager } from './pages/admin/StaffManager';
 import { Toaster } from 'sonner';
 
 // Root redirect handler
@@ -73,16 +80,24 @@ export function App() {
           <Route
             path="/my-token"
             element={
-              <ProtectedRoute allowedRoles={['customer']}>
-                <CustomerDashboard />
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <ActiveTokenPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/queue-history"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <QueueHistoryPage />
               </ProtectedRoute>
             }
           />
           <Route
             path="/history"
             element={
-              <ProtectedRoute allowedRoles={['customer']}>
-                <CustomerDashboard />
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <QueueHistoryPage />
               </ProtectedRoute>
             }
           />
@@ -90,7 +105,7 @@ export function App() {
             path="/profile"
             element={
               <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
-                <CustomerDashboard />
+                <ProfilePage />
               </ProtectedRoute>
             }
           />
@@ -126,7 +141,7 @@ export function App() {
             path="/admin/organization"
             element={
               <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
-                <AdminDashboard />
+                <OrganizationManager />
               </ProtectedRoute>
             }
           />
@@ -134,7 +149,7 @@ export function App() {
             path="/admin/services"
             element={
               <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
-                <AdminDashboard />
+                <ServiceManager />
               </ProtectedRoute>
             }
           />
@@ -142,7 +157,7 @@ export function App() {
             path="/admin/counters"
             element={
               <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
-                <AdminDashboard />
+                <CounterManager />
               </ProtectedRoute>
             }
           />
@@ -150,7 +165,7 @@ export function App() {
             path="/admin/staff"
             element={
               <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
-                <AdminDashboard />
+                <StaffManager />
               </ProtectedRoute>
             }
           />

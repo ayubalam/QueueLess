@@ -3,6 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
+import organizationRoutes from './routes/organizationRoutes';
+import serviceRoutes from './routes/serviceRoutes';
+import counterRoutes from './routes/counterRoutes';
+import staffRoutes from './routes/staffRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
@@ -30,6 +34,10 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/counters', counterRoutes);
+app.use('/api/staff', staffRoutes);
 
 app.use(errorHandler);
 
