@@ -48,6 +48,24 @@ const RootRedirect: React.FC = () => {
   }
 };
 
+// Role-aware dashboard: renders the correct dashboard for the authenticated user's role.
+// Prevents a staff/admin user who navigates directly to /dashboard from seeing CustomerDashboard.
+const DashboardRouter: React.FC = () => {
+  const { user } = useAuth();
+
+  switch (user?.role) {
+    case 'staff':
+      return <StaffDashboard />;
+    case 'organization_admin':
+      return <AdminDashboard />;
+    case 'super_admin':
+      return <SuperAdminDashboard />;
+    case 'customer':
+    default:
+      return <CustomerDashboard />;
+  }
+};
+
 export function App() {
   return (
     <Router>
@@ -65,7 +83,7 @@ export function App() {
             path="/dashboard"
             element={
               <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
-                <CustomerDashboard />
+                <DashboardRouter />
               </ProtectedRoute>
             }
           />
