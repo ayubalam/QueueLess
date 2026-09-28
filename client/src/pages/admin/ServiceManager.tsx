@@ -148,29 +148,29 @@ export const ServiceManager: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center space-x-3">
           <Link
             to="/admin/dashboard"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-amber-400" />
+            <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-blue-600" />
               Service Management
             </h1>
-            <p className="text-xs text-slate-400">Configure queue services and estimated processing times</p>
+            <p className="text-xs text-slate-500">Configure queue services and estimated processing times</p>
           </div>
         </div>
 
         {selectedOrgId && (
           <button
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs inline-flex items-center gap-2 transition-colors shadow-lg shadow-amber-600/20"
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs inline-flex items-center gap-2 transition-colors shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Service</span>
@@ -181,13 +181,13 @@ export const ServiceManager: React.FC = () => {
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 space-y-6">
         {/* Organization Selector */}
         {organizations.length > 1 && (
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-4 rounded-xl">
-            <Building className="w-4 h-4 text-amber-400" />
-            <label className="text-xs font-medium text-slate-300">Select Organization:</label>
+          <div className="flex items-center gap-3 bg-white border border-slate-200 p-4 rounded-xl shadow-xs">
+            <Building className="w-4 h-4 text-blue-600" />
+            <label className="text-xs font-medium text-slate-700">Select Organization:</label>
             <select
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+              className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             >
               {organizations.map((org) => (
                 <option key={org._id} value={org._id}>
@@ -200,20 +200,22 @@ export const ServiceManager: React.FC = () => {
 
         {isLoading ? (
           <div className="flex items-center justify-center p-12">
-            <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           </div>
         ) : services.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center max-w-md mx-auto space-y-4">
-            <Sliders className="w-8 h-8 text-amber-400 mx-auto" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center max-w-md mx-auto space-y-4 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto border border-blue-100">
+              <Sliders className="w-6 h-6" />
+            </div>
             <div>
-              <h3 className="text-base font-bold text-white">No Services Created Yet</h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <h3 className="text-base font-bold text-slate-900">No Services Created Yet</h3>
+              <p className="text-xs text-slate-500 mt-1">
                 Add your first service (e.g., "General Consultation", "Document Verification").
               </p>
             </div>
             <button
               onClick={handleOpenCreateModal}
-              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs inline-flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-xs"
             >
               <Plus className="w-4 h-4" />
               <span>Create Service</span>
@@ -224,30 +226,30 @@ export const ServiceManager: React.FC = () => {
             {services.map((service) => (
               <div
                 key={service._id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 hover:border-slate-700 transition-all"
+                className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 hover:border-slate-300 hover:shadow-sm transition-all shadow-xs"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-base font-bold text-white">{service.name}</h3>
+                      <h3 className="text-base font-bold text-slate-900">{service.name}</h3>
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                           service.isActive
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}
                       >
                         {service.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                     {service.description && (
-                      <p className="text-xs text-slate-400 mt-1">{service.description}</p>
+                      <p className="text-xs text-slate-500 mt-1">{service.description}</p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-xs text-slate-400">
-                  <div className="flex items-center gap-1.5 text-amber-400 font-medium">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5 text-blue-600 font-medium">
                     <Clock className="w-3.5 h-3.5" />
                     <span>~{service.estimatedServiceTime} mins est. service time</span>
                   </div>
@@ -255,25 +257,25 @@ export const ServiceManager: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleToggleStatus(service)}
-                      className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                       title={service.isActive ? 'Deactivate' : 'Activate'}
                     >
                       {service.isActive ? (
-                        <XCircle className="w-4 h-4 text-rose-400" />
+                        <XCircle className="w-4 h-4 text-rose-600" />
                       ) : (
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
                       )}
                     </button>
                     <button
                       onClick={() => handleOpenEditModal(service)}
-                      className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors"
                       title="Edit Service"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeletingService(service)}
-                      className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-colors"
                       title="Delete Service"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -288,25 +290,25 @@ export const ServiceManager: React.FC = () => {
 
       {/* Create / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-base font-bold text-white">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <h3 className="text-base font-bold text-slate-900">
               {editingService ? 'Edit Service' : 'Create New Service'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 mb-1">Service Name *</label>
+                <label className="block text-slate-700 mb-1">Service Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Cash Deposit, General Consultation"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:border-amber-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 mb-1">Estimated Service Time (minutes) *</label>
+                <label className="block text-slate-700 mb-1">Estimated Service Time (minutes) *</label>
                 <input
                   type="number"
                   required
@@ -314,17 +316,17 @@ export const ServiceManager: React.FC = () => {
                   max={480}
                   value={formData.estimatedServiceTime}
                   onChange={(e) => setFormData({ ...formData, estimatedServiceTime: parseInt(e.target.value) || 15 })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:border-amber-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 mb-1">Description</label>
+                <label className="block text-slate-700 mb-1">Description</label>
                 <textarea
                   rows={3}
                   placeholder="Optional summary for customers..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:border-amber-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
 
@@ -332,14 +334,14 @@ export const ServiceManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold inline-flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold inline-flex items-center gap-1.5 shadow-xs"
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   <span>{editingService ? 'Save Changes' : 'Create Service'}</span>
@@ -352,22 +354,22 @@ export const ServiceManager: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {deletingService && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-4">
-            <div className="w-10 h-10 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-5 h-5" />
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+              <AlertTriangle className="w-6 h-6" />
             </div>
             <div className="text-center">
-              <h3 className="text-base font-bold text-white">Delete Service</h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Are you sure you want to delete <span className="font-semibold text-slate-200">{deletingService.name}</span>?
+              <h3 className="text-base font-bold text-slate-900">Delete Service</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Are you sure you want to delete <span className="font-semibold text-slate-900">{deletingService.name}</span>?
               </p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDeletingService(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200"
               >
                 Cancel
               </button>
@@ -375,7 +377,7 @@ export const ServiceManager: React.FC = () => {
                 type="button"
                 onClick={handleDelete}
                 disabled={isSubmitting}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs inline-flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs inline-flex items-center gap-1.5 shadow-xs"
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 <span>Delete</span>
