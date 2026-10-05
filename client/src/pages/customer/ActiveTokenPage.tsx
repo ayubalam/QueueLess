@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   Ticket,
@@ -13,11 +13,16 @@ import {
   AlertTriangle,
   Loader2,
   Calendar,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { fetchMyActiveToken, cancelQueueToken } from '../../lib/api/queueApi';
 import type { QueueToken } from '../../types/queue';
 import { toast } from 'sonner';
+import { useQueueSocket } from '../../hooks/useQueueSocket';
+import { useSocketStatus } from '../../hooks/useSocketStatus';
+import type { QueueUpdatePayload } from '../../lib/socketEvents';
 
 export const ActiveTokenPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -26,8 +31,9 @@ export const ActiveTokenPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const { connected, reconnecting } = useSocketStatus();
 
-  const loadActiveToken = async (silent: boolean = false) => {
+  const loadActiveToken = useCallback(async (silent: boolean = false) => {
     try {
       if (!silent) setIsLoading(true);
       else setIsRefreshing(true);
@@ -40,11 +46,35 @@ export const ActiveTokenPage: React.FC = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadActiveToken();
-  }, []);
+  }, [loadActiveToken]);
+
+  // Derive serviceId from the current token for socket room subscription
+  const serviceId = token
+    ? (typeof token.serviceId === 'object' ? (token.serviceId as any)._id : token.serviceId)
+    : null;
+
+  // Real-time queue updates — refetch from backend (source of truth)
+  const handleQueueUpdate = useCallback((payload: QueueUpdatePayload) => {
+    // If this event concerns our token specifically, update status immediately
+    if (payload.tokenId === token?._id) {
+      setToken(prev => prev ? { ...prev, status: payload.status as QueueToken['status'] } : prev);
+      if (payload.eventType === 'TOKEN_CALLED') {
+        toast.info('🔔 Your number has been called! Please proceed to the counter.', { duration: 8000 });
+      } else if (payload.eventType === 'TOKEN_SERVING') {
+        toast.success('✅ You are now being served.');
+      } else if (payload.eventType === 'TOKEN_COMPLETED') {
+        toast.success('Service completed. Thank you!');
+      }
+    }
+    // Any queue change (someone ahead completed/cancelled) → refetch for accurate position
+    loadActiveToken(true);
+  }, [token?._id, loadActiveToken]);
+
+  useQueueSocket({ serviceId, onQueueUpdate: handleQueueUpdate });
 
   const handleCancel = async () => {
     if (!token) return;
@@ -100,6 +130,23 @@ export const ActiveTokenPage: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Live connection indicator */}
+          <span className={`hidden sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+            reconnecting
+              ? 'bg-amber-50 border-amber-200 text-amber-700'
+              : connected
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-slate-100 border-slate-200 text-slate-500'
+          }`}>
+            {reconnecting ? (
+              <><Loader2 className="w-3 h-3 animate-spin" /> Reconnecting...</>
+            ) : connected ? (
+              <><Wifi className="w-3 h-3" /> Live</>
+            ) : (
+              <><WifiOff className="w-3 h-3" /> Offline</>
+            )}
+          </span>
+
           <button
             onClick={() => loadActiveToken(true)}
             disabled={isRefreshing || isLoading}
@@ -227,13 +274,13 @@ export const ActiveTokenPage: React.FC = () => {
             {/* Helper Message based on status */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 text-center">
               {token.status === 'WAITING' && (
-                <span>Please keep this page open or check back. You will be alerted when your number is called.</span>
+                <span>Please keep this page open. Position updates automatically — no refresh needed.</span>
               )}
               {token.status === 'CALLED' && (
-                <span className="text-blue-700 font-semibold">Your number has been called! Please proceed to the service desk.</span>
+                <span className="text-blue-700 font-semibold">🔔 Your number has been called! Please proceed to the service desk.</span>
               )}
               {token.status === 'SERVING' && (
-                <span className="text-emerald-700 font-semibold">You are currently being served.</span>
+                <span className="text-emerald-700 font-semibold">✅ You are currently being served.</span>
               )}
             </div>
 

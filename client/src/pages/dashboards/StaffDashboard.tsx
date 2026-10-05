@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, ShieldCheck, Users, Play, CheckCircle2, SkipForward, RefreshCw, Clock } from 'lucide-react';
+import { LogOut, ShieldCheck, Users, Play, CheckCircle2, SkipForward, RefreshCw, Clock, Wifi, WifiOff, Loader2 as Loader } from 'lucide-react';
 import { fetchStaffQueueContext, callNextToken, startServingToken, completeToken, skipToken } from '../../lib/api/staffQueueApi';
 import type { StaffQueueContext } from '../../types/staffQueue';
 import { toast } from 'sonner';
+import { useQueueSocket } from '../../hooks/useQueueSocket';
+import { useSocketStatus } from '../../hooks/useSocketStatus';
 
 export const StaffDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -11,6 +13,7 @@ export const StaffDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOperating, setIsOperating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { connected, reconnecting } = useSocketStatus();
 
   const loadQueue = useCallback(async () => {
     try {
@@ -28,6 +31,20 @@ export const StaffDashboard: React.FC = () => {
   useEffect(() => {
     loadQueue();
   }, [loadQueue]);
+
+  // Derive serviceId from context for socket room subscription
+  const serviceId = context?.service
+    ? (typeof context.service === 'object' ? (context.service as any)._id : context.service)
+    : null;
+
+  // When any queue event fires in the service room, reload queue state
+  useQueueSocket({
+    serviceId,
+    onQueueUpdate: useCallback(() => {
+      // Only auto-refresh if not currently mid-operation (avoids race conditions)
+      if (!isOperating) loadQueue();
+    }, [loadQueue, isOperating]),
+  });
 
   const handleCallNext = async () => {
     try {
@@ -127,6 +144,22 @@ export const StaffDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Live connection indicator */}
+          <span className={`hidden sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+            reconnecting
+              ? 'bg-amber-50 border-amber-200 text-amber-700'
+              : connected
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-slate-100 border-slate-200 text-slate-500'
+          }`}>
+            {reconnecting ? (
+              <><Loader className="w-3 h-3 animate-spin" /> Reconnecting...</>
+            ) : connected ? (
+              <><Wifi className="w-3 h-3" /> Live</>
+            ) : (
+              <><WifiOff className="w-3 h-3" /> Offline</>
+            )}
+          </span>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 border border-purple-200 text-purple-700">
             <ShieldCheck className="w-3.5 h-3.5 mr-1" />
             {user?.role}

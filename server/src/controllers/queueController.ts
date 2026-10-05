@@ -12,6 +12,8 @@ import {
 } from '../services/queueEngine';
 import { joinQueueSchema, queueIdParamSchema } from '../validators/queueValidator';
 import { AppError } from '../utils/AppError';
+import { broadcastQueueUpdate } from '../socket/socketServer';
+import type { QueueUpdatePayload } from '../socket/socketEvents';
 
 /**
  * Join an active service queue
@@ -230,6 +232,19 @@ export const cancelQueueToken = async (
     token.status = 'CANCELLED';
     token.cancelledAt = new Date();
     await token.save();
+
+    // Broadcast cancellation so other clients in the service room update their positions
+    const cancelPayload: QueueUpdatePayload = {
+      serviceId: token.serviceId.toString(),
+      organizationId: token.organizationId.toString(),
+      queueDate: token.queueDate,
+      eventType: 'TOKEN_CANCELLED',
+      tokenId: token._id.toString(),
+      tokenCode: token.tokenCode,
+      status: 'CANCELLED',
+      timestamp: new Date().toISOString(),
+    };
+    broadcastQueueUpdate(cancelPayload);
 
     res.status(200).json({
       success: true,

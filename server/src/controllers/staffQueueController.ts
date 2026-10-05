@@ -4,6 +4,8 @@ import { QueueToken } from '../models/QueueToken';
 import { Counter } from '../models/Counter';
 import { Service } from '../models/Service';
 import { getTodayDateString } from '../services/queueEngine';
+import { broadcastQueueUpdate } from '../socket/socketServer';
+import type { QueueUpdatePayload } from '../socket/socketEvents';
 
 // GET /api/staff/queue
 export const getQueueContext = async (req: Request, res: Response) => {
@@ -114,6 +116,19 @@ export const callNextToken = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'No waiting tokens available' });
     }
 
+    // Broadcast after successful DB update
+    const payload: QueueUpdatePayload = {
+      serviceId: counter.serviceId.toString(),
+      organizationId: counter.organizationId.toString(),
+      queueDate: today,
+      eventType: 'TOKEN_CALLED',
+      tokenId: calledToken._id.toString(),
+      tokenCode: calledToken.tokenCode,
+      status: 'CALLED',
+      timestamp: new Date().toISOString(),
+    };
+    broadcastQueueUpdate(payload);
+
     res.json({ success: true, data: calledToken });
   } catch (error) {
     console.error('callNextToken error:', error);
@@ -145,6 +160,19 @@ export const startServingToken = async (req: Request, res: Response) => {
     token.servingStartedAt = new Date();
     await token.save();
 
+    // Broadcast after successful DB update
+    const payload: QueueUpdatePayload = {
+      serviceId: token.serviceId.toString(),
+      organizationId: token.organizationId.toString(),
+      queueDate: token.queueDate,
+      eventType: 'TOKEN_SERVING',
+      tokenId: token._id.toString(),
+      tokenCode: token.tokenCode,
+      status: 'SERVING',
+      timestamp: new Date().toISOString(),
+    };
+    broadcastQueueUpdate(payload);
+
     res.json({ success: true, data: token });
   } catch (error) {
     console.error('startServingToken error:', error);
@@ -175,6 +203,19 @@ export const completeToken = async (req: Request, res: Response) => {
     token.status = 'COMPLETED';
     token.completedAt = new Date();
     await token.save();
+
+    // Broadcast after successful DB update
+    const payload: QueueUpdatePayload = {
+      serviceId: token.serviceId.toString(),
+      organizationId: token.organizationId.toString(),
+      queueDate: token.queueDate,
+      eventType: 'TOKEN_COMPLETED',
+      tokenId: token._id.toString(),
+      tokenCode: token.tokenCode,
+      status: 'COMPLETED',
+      timestamp: new Date().toISOString(),
+    };
+    broadcastQueueUpdate(payload);
 
     res.json({ success: true, data: token });
   } catch (error) {
@@ -210,6 +251,19 @@ export const skipToken = async (req: Request, res: Response) => {
 
     token.status = 'SKIPPED';
     await token.save();
+
+    // Broadcast after successful DB update
+    const payload: QueueUpdatePayload = {
+      serviceId: token.serviceId.toString(),
+      organizationId: token.organizationId.toString(),
+      queueDate: token.queueDate,
+      eventType: 'TOKEN_SKIPPED',
+      tokenId: token._id.toString(),
+      tokenCode: token.tokenCode,
+      status: 'SKIPPED',
+      timestamp: new Date().toISOString(),
+    };
+    broadcastQueueUpdate(payload);
 
     res.json({ success: true, data: token });
   } catch (error) {

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { User } from '../types/auth';
 import { apiRequest, setAccessToken } from '../lib/api';
 import type { LoginFormData, RegisterFormData } from '../lib/validators/auth';
+import { connectSocket, disconnectSocket } from '../lib/socket';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (refreshRes.success && refreshRes.data) {
         setAccessToken(refreshRes.data.accessToken);
         setUser(refreshRes.data.user);
+        // Connect socket now that we have a valid token
+        connectSocket();
       }
     } catch {
       setAccessToken(null);
@@ -60,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.success && res.data) {
         setAccessToken(res.data.accessToken);
         setUser(res.data.user);
+        // Connect socket after successful login
+        connectSocket();
       }
     } catch (err: any) {
       const msg = err.response?.message || err.message || 'Login failed. Please try again.';
@@ -101,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setAccessToken(null);
       setUser(null);
+      disconnectSocket();
     }
   };
 
