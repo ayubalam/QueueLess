@@ -7,6 +7,7 @@ import {
   Sliders,
   Users,
   Monitor,
+  BarChart3,
   ArrowRight,
   Loader2,
 } from 'lucide-react';
@@ -184,6 +185,22 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 transition-colors" />
+          </Link>
+
+          <Link
+            to="/admin/analytics"
+            className="p-5 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group flex items-center justify-between shadow-xs md:col-span-2"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Operations & Analytics</h3>
+                <p className="text-xs text-slate-500">Track queue performance, wait times, completion rates, and throughput</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
           </Link>
         </div>
       </main>

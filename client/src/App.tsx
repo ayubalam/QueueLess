@@ -20,6 +20,7 @@ import { StaffManager } from './pages/admin/StaffManager';
 import { PublicQueueDisplay } from './pages/public/PublicQueueDisplay';
 import { CustomerJoinPage } from './pages/public/CustomerJoinPage';
 import { NotificationsPage } from './pages/customer/NotificationsPage';
+import { AnalyticsPage } from './pages/admin/AnalyticsPage';
 import { Toaster } from 'sonner';
 
 // Root redirect handler
@@ -206,7 +207,7 @@ export function App() {
             path="/admin/analytics"
             element={
               <ProtectedRoute allowedRoles={['organization_admin', 'super_admin']}>
-                <AdminDashboard />
+                <AnalyticsPage />
               </ProtectedRoute>
             }
           />

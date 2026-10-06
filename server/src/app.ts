@@ -11,6 +11,7 @@ import queueRoutes from './routes/queueRoutes';
 import staffQueueRoutes from './routes/staffQueueRoutes';
 import publicRoutes from './routes/publicRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
@@ -46,6 +47,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/queues', queueRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.use(errorHandler);
 
