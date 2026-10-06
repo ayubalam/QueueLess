@@ -6,6 +6,7 @@
 export const SOCKET_EVENTS = {
   // Server → Client broadcasts
   QUEUE_UPDATED: 'queue:updated',
+  NOTIFICATION_NEW: 'notification:new',
 
   // Client → Server room management
   JOIN_SERVICE_ROOM: 'join:service-room',
@@ -35,3 +36,9 @@ export interface QueueUpdatePayload {
  */
 export const serviceRoom = (serviceId: string): string =>
   `queue:service:${serviceId}`;
+
+/**
+ * Returns the private notification room name for a given userId.
+ */
+export const userRoom = (userId: string): string =>
+  `user:${userId}`;

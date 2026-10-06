@@ -6,6 +6,13 @@ import { Service } from '../models/Service';
 import { getTodayDateString } from '../services/queueEngine';
 import { broadcastQueueUpdate } from '../socket/socketServer';
 import type { QueueUpdatePayload } from '../socket/socketEvents';
+import {
+  createTokenCalledNotification,
+  createTokenServingNotification,
+  createTokenCompletedNotification,
+  createTokenSkippedNotification,
+  checkAndNotifyTurnApproaching,
+} from '../services/notificationService';
 
 // GET /api/staff/queue
 export const getQueueContext = async (req: Request, res: Response) => {
@@ -129,6 +136,15 @@ export const callNextToken = async (req: Request, res: Response) => {
     };
     broadcastQueueUpdate(payload);
 
+    // Notify customer that token was called (non-blocking)
+    createTokenCalledNotification(calledToken).catch((err) =>
+      console.error('[staffQueueController] Notification error:', err)
+    );
+    // Check if next waiting customers are now approaching (position <= 2)
+    checkAndNotifyTurnApproaching(counter.serviceId, today).catch((err) =>
+      console.error('[staffQueueController] Turn approaching alert error:', err)
+    );
+
     res.json({ success: true, data: calledToken });
   } catch (error) {
     console.error('callNextToken error:', error);
@@ -173,6 +189,11 @@ export const startServingToken = async (req: Request, res: Response) => {
     };
     broadcastQueueUpdate(payload);
 
+    // Notify customer that service has started
+    createTokenServingNotification(token).catch((err) =>
+      console.error('[staffQueueController] Notification error:', err)
+    );
+
     res.json({ success: true, data: token });
   } catch (error) {
     console.error('startServingToken error:', error);
@@ -216,6 +237,15 @@ export const completeToken = async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     };
     broadcastQueueUpdate(payload);
+
+    // Notify customer that service completed
+    createTokenCompletedNotification(token).catch((err) =>
+      console.error('[staffQueueController] Notification error:', err)
+    );
+    // Check if waiting customers moved into position <= 2
+    checkAndNotifyTurnApproaching(token.serviceId, token.queueDate).catch((err) =>
+      console.error('[staffQueueController] Turn approaching alert error:', err)
+    );
 
     res.json({ success: true, data: token });
   } catch (error) {
@@ -264,6 +294,15 @@ export const skipToken = async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     };
     broadcastQueueUpdate(payload);
+
+    // Notify customer that token was skipped
+    createTokenSkippedNotification(token).catch((err) =>
+      console.error('[staffQueueController] Notification error:', err)
+    );
+    // Check if waiting customers moved into position <= 2
+    checkAndNotifyTurnApproaching(token.serviceId, token.queueDate).catch((err) =>
+      console.error('[staffQueueController] Turn approaching alert error:', err)
+    );
 
     res.json({ success: true, data: token });
   } catch (error) {

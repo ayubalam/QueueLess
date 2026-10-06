@@ -6,7 +6,7 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { socketAuthMiddleware } from './socketAuth';
-import { SOCKET_EVENTS, serviceRoom } from './socketEvents';
+import { SOCKET_EVENTS, serviceRoom, userRoom } from './socketEvents';
 import { QueueToken } from '../models/QueueToken';
 import { Counter } from '../models/Counter';
 import { ACTIVE_QUEUE_STATUSES } from '../services/queueEngine';
@@ -33,6 +33,13 @@ export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
   io.on('connection', (socket: Socket) => {
     const { userId, role } = socket.data as { userId: string; role: string };
     console.log(`[Socket] Connected: userId=${userId} role=${role} socketId=${socket.id}`);
+
+    // Auto-join private notification room for authenticated users
+    if (userId && userId !== 'anonymous' && role !== 'public') {
+      const uRoom = userRoom(userId);
+      socket.join(uRoom);
+      console.log(`[Socket] userId=${userId} joined private room ${uRoom}`);
+    }
 
     // ── Authorised room join ────────────────────────────────────────────────
     socket.on(SOCKET_EVENTS.JOIN_SERVICE_ROOM, async (serviceId: string) => {
@@ -139,6 +146,22 @@ export const broadcastQueueUpdate = (
   } catch (err) {
     // Broadcasting failure must never crash queue operations
     console.error('[Socket] broadcastQueueUpdate error:', err);
+  }
+};
+
+/**
+ * Emit a private event to a specific authenticated user.
+ * Sent only to the user's private room `user:<userId>`.
+ * Does not emit to public or service rooms.
+ */
+export const emitToUser = (userId: string, event: string, payload: any): void => {
+  try {
+    if (!io) return;
+    const room = userRoom(userId);
+    io.to(room).emit(event, payload);
+    console.log(`[Socket] Emitted ${event} to user room ${room}`);
+  } catch (err) {
+    console.error('[Socket] emitToUser error:', err);
   }
 };
 

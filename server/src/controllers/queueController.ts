@@ -14,6 +14,10 @@ import { joinQueueSchema, queueIdParamSchema } from '../validators/queueValidato
 import { AppError } from '../utils/AppError';
 import { broadcastQueueUpdate } from '../socket/socketServer';
 import type { QueueUpdatePayload } from '../socket/socketEvents';
+import {
+  createTokenCancelledNotification,
+  checkAndNotifyTurnApproaching,
+} from '../services/notificationService';
 
 /**
  * Join an active service queue
@@ -88,6 +92,11 @@ export const joinQueue = async (
       joinedAt: new Date(),
       estimatedWaitMinutes,
     });
+
+    // Check if new joiner or next in line qualifies for turn approaching alert (non-blocking)
+    checkAndNotifyTurnApproaching(service._id, queueDate).catch((err) =>
+      console.error('[queueController] Turn approaching alert error on join:', err)
+    );
 
     res.status(201).json({
       success: true,
@@ -245,6 +254,15 @@ export const cancelQueueToken = async (
       timestamp: new Date().toISOString(),
     };
     broadcastQueueUpdate(cancelPayload);
+
+    // Notify customer that token was cancelled (non-blocking)
+    createTokenCancelledNotification(token).catch((err) =>
+      console.error('[queueController] Cancel notification error:', err)
+    );
+    // Check if remaining waiting customers moved into position <= 2
+    checkAndNotifyTurnApproaching(token.serviceId, token.queueDate).catch((err) =>
+      console.error('[queueController] Turn approaching alert error:', err)
+    );
 
     res.status(200).json({
       success: true,

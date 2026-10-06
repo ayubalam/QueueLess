@@ -22,6 +22,8 @@ import type { QueueToken } from '../../types/queue';
 import { toast } from 'sonner';
 import { useQueueSocket } from '../../hooks/useQueueSocket';
 import { useSocketStatus } from '../../hooks/useSocketStatus';
+import { useNotificationSocket } from '../../hooks/useNotificationSocket';
+import { NotificationCenter } from '../../components/notifications/NotificationCenter';
 import type { QueueUpdatePayload } from '../../lib/socketEvents';
 
 export const ActiveTokenPage: React.FC = () => {
@@ -75,6 +77,11 @@ export const ActiveTokenPage: React.FC = () => {
   }, [token?._id, loadActiveToken]);
 
   useQueueSocket({ serviceId, onQueueUpdate: handleQueueUpdate });
+  useNotificationSocket({
+    onNotification: useCallback(() => {
+      loadActiveToken(true);
+    }, [loadActiveToken]),
+  });
 
   const handleCancel = async () => {
     if (!token) return;
@@ -156,6 +163,7 @@ export const ActiveTokenPage: React.FC = () => {
             <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
+          <NotificationCenter />
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700">
             <ShieldCheck className="w-3.5 h-3.5 mr-1" />
             {user?.role}

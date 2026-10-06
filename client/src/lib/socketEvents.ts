@@ -5,6 +5,7 @@
 
 export const SOCKET_EVENTS = {
   QUEUE_UPDATED: 'queue:updated',
+  NOTIFICATION_NEW: 'notification:new',
   JOIN_SERVICE_ROOM: 'join:service-room',
   LEAVE_SERVICE_ROOM: 'leave:service-room',
 } as const;

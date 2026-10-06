@@ -19,6 +19,7 @@ import { CounterManager } from './pages/admin/CounterManager';
 import { StaffManager } from './pages/admin/StaffManager';
 import { PublicQueueDisplay } from './pages/public/PublicQueueDisplay';
 import { CustomerJoinPage } from './pages/public/CustomerJoinPage';
+import { NotificationsPage } from './pages/customer/NotificationsPage';
 import { Toaster } from 'sonner';
 
 // Root redirect handler
@@ -130,6 +131,14 @@ export function App() {
             element={
               <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'staff', 'organization_admin', 'super_admin']}>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

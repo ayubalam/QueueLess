@@ -17,8 +17,10 @@ import {
   CheckCircle2,
   Wifi,
   WifiOff,
+  Bell,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { NotificationCenter } from '../../components/notifications/NotificationCenter';
 import { fetchOrganizations, fetchServices } from '../../lib/api/orgApi';
 import { fetchMyActiveToken, joinQueue, cancelQueueToken } from '../../lib/api/queueApi';
 import type { Organization, Service } from '../../types/organization';
@@ -206,6 +208,9 @@ export const CustomerDashboard: React.FC = () => {
               )}
             </span>
           )}
+          {/* Notification Center Popover */}
+          <NotificationCenter />
+
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700">
             <ShieldCheck className="w-3.5 h-3.5 mr-1" />
             {user?.role}
@@ -223,7 +228,7 @@ export const CustomerDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 space-y-6">
         {/* Navigation Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             to="/my-token"
             className="p-5 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all flex flex-col items-start space-y-3 shadow-xs"
@@ -245,6 +250,19 @@ export const CustomerDashboard: React.FC = () => {
                   ? `Position #${activeToken.position ?? 1} • ~${activeToken.estimatedWaitMinutes ?? 0}m wait`
                   : 'View your current queue position'}
               </p>
+            </div>
+          </Link>
+
+          <Link
+            to="/notifications"
+            className="p-5 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all flex flex-col items-start space-y-3 shadow-xs"
+          >
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Notifications</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Live alerts and queue history</p>
             </div>
           </Link>
 
