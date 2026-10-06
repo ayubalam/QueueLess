@@ -17,7 +17,14 @@ export const socketAuthMiddleware = async (
   next: (err?: Error) => void
 ): Promise<void> => {
   try {
+    const isPublic = socket.handshake.auth?.isPublic === true;
     const token = socket.handshake.auth?.token as string | undefined;
+
+    if (isPublic) {
+      socket.data.userId = 'anonymous';
+      socket.data.role = 'public';
+      return next();
+    }
 
     if (!token) {
       return next(new Error('Authentication required: no token provided'));

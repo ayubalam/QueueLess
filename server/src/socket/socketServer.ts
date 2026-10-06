@@ -44,7 +44,16 @@ export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
 
         let authorized = false;
 
-        if (role === 'staff') {
+        if (role === 'public') {
+          // Public monitor: authorize only if service and organization exist and are active
+          const { Service } = await import('../models/Service');
+          const { Organization } = await import('../models/Organization');
+          const service = await Service.findById(serviceId).lean();
+          if (service && service.isActive) {
+            const org = await Organization.findById(service.organizationId).lean();
+            authorized = !!org && org.isActive;
+          }
+        } else if (role === 'staff') {
           // Staff: authorise from their assigned counter in the DB — never trust client claim
           const counter = await Counter.findOne({ _id: { $exists: true } })
             .where('organizationId').exists(true)

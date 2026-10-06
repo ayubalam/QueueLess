@@ -14,7 +14,9 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from?.pathname || null;
+  const searchParams = new URLSearchParams(location.search);
+  const redirectParam = searchParams.get('redirect');
+  const from = redirectParam || (location.state as any)?.from?.pathname || null;
 
   const {
     register,

@@ -11,8 +11,13 @@ import {
   AlertTriangle,
   Loader2,
   Building,
+  QrCode,
+  Download,
+  ExternalLink,
+  Copy,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { QRCodeCanvas } from 'qrcode.react';
 import {
   fetchOrganizations,
   fetchServices,
@@ -35,6 +40,7 @@ export const ServiceManager: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deletingService, setDeletingService] = useState<Service | null>(null);
+  const [qrService, setQrService] = useState<Service | null>(null);
 
   // Form
   const [formData, setFormData] = useState({
@@ -147,6 +153,25 @@ export const ServiceManager: React.FC = () => {
     }
   };
 
+  const handleDownloadQr = () => {
+    if (!qrService) return;
+    const canvas = document.getElementById('service-qr-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const pngUrl = canvas.toDataURL('image/png');
+    const downloadLink = document.createElement('a');
+    downloadLink.href = pngUrl;
+    downloadLink.download = `${qrService.name.replace(/\s+/g, '_')}_QR.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    toast.success('QR Code downloaded');
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard`);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Header */}
@@ -255,6 +280,13 @@ export const ServiceManager: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setQrService(service)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title="QR Code & Public Display"
+                    >
+                      <QrCode className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleToggleStatus(service)}
                       className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -381,6 +413,129 @@ export const ServiceManager: React.FC = () => {
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code & Public Display Modal */}
+      {qrService && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div className="text-center space-y-1">
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block">
+                QR & Public Display
+              </span>
+              <h3 className="text-lg font-extrabold text-slate-900">
+                {qrService.name}
+              </h3>
+              {qrService.description && (
+                <p className="text-xs text-slate-500 line-clamp-2">{qrService.description}</p>
+              )}
+              <span className="inline-block text-[11px] font-semibold text-slate-400 mt-1">
+                Estimated service: ~{qrService.estimatedServiceTime} mins
+              </span>
+            </div>
+
+            {/* QR Code Canvas Card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center flex flex-col items-center justify-center space-y-2">
+              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
+                <QRCodeCanvas
+                  id="service-qr-canvas"
+                  value={`${window.location.origin}/join/${qrService._id}`}
+                  size={180}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <span className="text-xs font-bold text-slate-700">
+                Scan to Join Queue
+              </span>
+              <p className="text-[10px] text-slate-400">
+                Place this QR code at your entrance or front desk
+              </p>
+            </div>
+
+            {/* Link & URL sharing */}
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider block mb-1">
+                  Customer Check-In URL
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/join/${qrService._id}`}
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 select-all"
+                  />
+                  <button
+                    onClick={() => copyToClipboard(`${window.location.origin}/join/${qrService._id}`, 'Join Link')}
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors"
+                    title="Copy Link"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <a
+                    href={`/join/${qrService._id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-blue-600 transition-colors"
+                    title="Open Customer Join Page"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider block mb-1">
+                  Public TV / Monitor Display URL
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/public/queue/${qrService._id}`}
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 select-all"
+                  />
+                  <button
+                    onClick={() => copyToClipboard(`${window.location.origin}/public/queue/${qrService._id}`, 'Display Link')}
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors"
+                    title="Copy Link"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <a
+                    href={`/public/queue/${qrService._id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-blue-600 transition-colors"
+                    title="Open Public Display"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleDownloadQr}
+                className="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl inline-flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download QR</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setQrService(null)}
+                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>

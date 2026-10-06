@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, User as UserIcon, Phone, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { registerSchema, type RegisterFormData } from '../../lib/validators/auth';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +13,10 @@ export const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirect');
 
   const {
     register,
@@ -60,7 +64,7 @@ export const RegisterPage: React.FC = () => {
     try {
       await registerUser(data);
       toast.success('Account created successfully! Welcome to QueueLess.');
-      navigate('/dashboard', { replace: true });
+      navigate(redirectUrl || '/dashboard', { replace: true });
     } catch {
       // Error state managed by AuthContext
     } finally {

@@ -25,10 +25,11 @@ export const connectSocket = (): Socket => {
   if (socket && socket.connected) return socket;
 
   const token = getAccessToken();
+  const authPayload = token ? { token } : { isPublic: true };
 
   if (!socket) {
     socket = io(SERVER_URL, {
-      auth: { token },
+      auth: authPayload,
       // Don't auto-connect — we control timing via connectSocket()
       autoConnect: false,
       withCredentials: true,
@@ -37,8 +38,8 @@ export const connectSocket = (): Socket => {
       reconnectionDelay: 2000,
     });
   } else {
-    // Update auth token before reconnecting (e.g. after token refresh)
-    (socket.auth as Record<string, unknown>).token = token;
+    // Update auth token before reconnecting (e.g. after token refresh or login/logout)
+    socket.auth = authPayload;
   }
 
   socket.connect();

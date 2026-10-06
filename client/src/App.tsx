@@ -17,6 +17,8 @@ import { OrganizationManager } from './pages/admin/OrganizationManager';
 import { ServiceManager } from './pages/admin/ServiceManager';
 import { CounterManager } from './pages/admin/CounterManager';
 import { StaffManager } from './pages/admin/StaffManager';
+import { PublicQueueDisplay } from './pages/public/PublicQueueDisplay';
+import { CustomerJoinPage } from './pages/public/CustomerJoinPage';
 import { Toaster } from 'sonner';
 
 // Root redirect handler
@@ -77,6 +79,10 @@ export function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          {/* Public Queue Display & QR Check-in Routes (Phase 6) */}
+          <Route path="/public/queue/:serviceId" element={<PublicQueueDisplay />} />
+          <Route path="/join/:serviceId" element={<CustomerJoinPage />} />
 
           {/* Customer Protected Routes */}
           <Route

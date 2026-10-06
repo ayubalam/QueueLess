@@ -9,6 +9,7 @@ import counterRoutes from './routes/counterRoutes';
 import staffRoutes from './routes/staffRoutes';
 import queueRoutes from './routes/queueRoutes';
 import staffQueueRoutes from './routes/staffQueueRoutes';
+import publicRoutes from './routes/publicRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
@@ -42,6 +43,7 @@ app.use('/api/counters', counterRoutes);
 app.use('/api/staff/queue', staffQueueRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/queues', queueRoutes);
+app.use('/api/public', publicRoutes);
 
 app.use(errorHandler);
 
